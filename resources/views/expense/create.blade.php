@@ -11,7 +11,7 @@
 
     <!-- Add Expense Form -->
     <div class="bg-gray-800 p-8 rounded-xl shadow-lg">
-        <form action="{{ route('expenses.store') }}" method="POST">
+        <form action="{{ route('expense.store') }}" method="POST">
             @csrf
             <div class="space-y-6">
                 <!-- Amount -->
