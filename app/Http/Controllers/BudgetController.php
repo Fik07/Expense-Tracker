@@ -2,20 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Budget;
 
 class BudgetController extends Controller
-{
+    {
     public function store(Request $request)
     {
         $validated = $request->validate([
             'monthly_budget' => 'required|numeric|min:0',
         ]);
 
-        // Optional: Replace existing budget for current month
+        $userId = Auth::id();
+        $month = now()->format('Y-m');
+
+        // Store or update budget for the current user & month
         Budget::updateOrCreate(
-            ['month' => now()->format('Y-m')],
+            ['user_id' => $userId, 'month' => $month],
             ['monthly_budget' => $validated['monthly_budget']]
         );
 
@@ -23,6 +27,12 @@ class BudgetController extends Controller
     }
     public function create()
     {
-        return view('budget.create');
+        // Optional: preload existing budget if you're editing
+        $budget = Budget::where('user_id', auth()->id())
+            ->where('month', now()->format('Y-m'))
+            ->first();
+
+        return view('budget.create', compact('budget'));
     }
+
 }

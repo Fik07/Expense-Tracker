@@ -31,7 +31,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Budget
-    Route::get('/budget/create', [ExpenseController::class, 'create'])->name('budget.create');
+    Route::get('/budget/create', [BudgetController::class, 'create'])->name('budget.create');
     Route::post('/budget', [BudgetController::class, 'store'])->name('budget.store');
 
     // Expense
