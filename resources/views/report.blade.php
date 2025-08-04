@@ -2,6 +2,24 @@
 
 @section('content')
 
+    <!-- START: Simple Notification Message -->
+    @if (session('status'))
+        <div id="status-notification" class="mb-6 p-4 rounded-xl flex items-center justify-between shadow-sm bg-green-800 border border-green-700">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-sm font-medium text-white">{{ session('status') }}</span>
+            </div>
+            <button onclick="document.getElementById('status-notification').remove()" class="p-1 text-gray-400 hover:bg-white/10 rounded-full">
+                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                </svg>
+            </button>
+        </div>
+    @endif
+    <!-- END: Simple Notification Message -->
+
     <!-- Header -->
     <header class="mb-8">
         <h1 class="text-3xl font-bold text-white">Expense Report</h1>
@@ -55,11 +73,17 @@
             <p class="text-gray-400 text-sm">#️⃣ Total Transactions</p>
             <p class="text-2xl font-bold">{{ $totalTransactions ?? 0 }}</p>
         </div>
-        <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center justify-center">
-             <button class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                Download Report
+        <form action="{{ route('report.email') }}" method="POST">
+            @csrf
+            <!-- preserve filters -->
+            <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+            <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+            <input type="hidden" name="category" value="{{ request('category') }}">
+
+            <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                Email Report
             </button>
-        </div>
+        </form>
     </div>
 
 
@@ -102,5 +126,4 @@
             @endif
         </div>
     </div>
-
 @endsection
