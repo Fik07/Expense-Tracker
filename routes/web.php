@@ -30,6 +30,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/report', [ReportController::class, 'index'])->name('report');
     Route::post('/report/email', [ReportController::class, 'emailReport'])->name('report.email');
 
+    Route::get('/test-email', function () {
+        $user = auth()->user();
+        $user->notify(new \App\Notifications\ExpenseExceeded(3000));
+    });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

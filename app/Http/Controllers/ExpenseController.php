@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\ExpenseExceeded;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 
@@ -38,15 +39,26 @@ class ExpenseController extends Controller
 
         Expense::create($validated);
 
+        // === Check budget and notify if exceeded ===
+        $user = Auth::user();
+
+        // Get total expenses for the current month
+        $totalExpenses = Expense::where('user_id', $user->id)
+                                ->whereMonth('date', now()->month)
+                                ->whereYear('date', now()->year)
+                                ->sum('amount');
+
+        // Assume budget is stored like this (adjust if different)
+        $monthlyBudget = optional($user->budget)->monthly_budget;
+
+        // Only notify if monthly budget exists and is exceeded
+        if ($monthlyBudget && $totalExpenses > $monthlyBudget) {
+            $user->notify(new ExpenseExceeded($totalExpenses));
+        }
+
         return redirect()->route('dashboard')->with('success', 'Expense added successfully!');
     }
 
-    public function edit($id)
-    {
-        $expense = Expense::findOrFail($id);
-
-        return view('expense.edit', compact('expense'));
-    }
 
     public function update(Request $request, $id)
     {
