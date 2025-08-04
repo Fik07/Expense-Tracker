@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\Budget;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -54,39 +55,80 @@ class ReportController extends Controller
     }
 
     public function emailReport(Request $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // Apply filters
-    $query = Expense::where('user_id', $user->id);
-    if ($request->start_date) $query->where('date', '>=', $request->start_date);
-    if ($request->end_date) $query->where('date', '<=', $request->end_date);
-    if ($request->category) $query->where('category', $request->category);
+        // Apply filters
+        $query = Expense::where('user_id', $user->id);
+        if ($request->start_date) $query->where('date', '>=', $request->start_date);
+        if ($request->end_date) $query->where('date', '<=', $request->end_date);
+        if ($request->category) $query->where('category', $request->category);
 
-    $expenses = $query->orderBy('date')->get();
+        $expenses = $query->orderBy('date')->get();
 
-    // Generate CSV
-    $filename = 'expense_report_' . Str::random(8) . '.csv';
-    $csvPath = storage_path("app/{$filename}");
-    $handle = fopen($csvPath, 'w');
-    fputcsv($handle, ['Date', 'Category', 'Amount', 'Note']);
+        // Generate CSV
+        $filename = 'expense_report_' . Str::random(8) . '.csv';
+        $csvPath = storage_path("app/{$filename}");
+        $handle = fopen($csvPath, 'w');
+        fputcsv($handle, ['Date', 'Category', 'Amount', 'Note']);
 
-    foreach ($expenses as $expense) {
-        fputcsv($handle, [
-            $expense->date,
-            $expense->category,
-            $expense->amount,
-            $expense->note
-        ]);
+        foreach ($expenses as $expense) {
+            fputcsv($handle, [
+                $expense->date,
+                $expense->category,
+                $expense->amount,
+                $expense->note
+            ]);
+        }
+
+        fclose($handle);
+
+        Mail::to($user->email)->queue(new ExpenseReportMail($csvPath));
+
+        return back()->with('status', 'Report is being processed and will be emailed to you soon!');
+
+    }
+    public function export(Request $request)
+    {
+        $query = Expense::where('user_id', auth()->id());
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('date', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('date', '<=', $request->end_date);
+        }
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $expenses = $query->orderByDesc('date')->get();
+
+        $filename = 'expense_report_' . now()->format('Y_m_d_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($expenses) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Date', 'Category', 'Amount (RM)', 'Note']);
+
+            foreach ($expenses as $expense) {
+                fputcsv($handle, [
+                    $expense->date->format('Y-m-d'),
+                    $expense->category,
+                    number_format($expense->amount, 2),
+                    $expense->note,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
-    fclose($handle);
 
-    // Send email using queue
-    Mail::to($user->email)->queue(new ExpenseReportMail($csvPath));
-
-    // Optional: delete later via queue cleanup, or schedule a task
-
-    return back()->with('status', 'Report is being processed and will be emailed to you soon!');
-}
 }

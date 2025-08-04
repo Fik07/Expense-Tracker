@@ -29,6 +29,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/report', [ReportController::class, 'index'])->name('report');
     Route::post('/report/email', [ReportController::class, 'emailReport'])->name('report.email');
+    Route::get('/report/export', [App\Http\Controllers\ReportController::class, 'export'])->name('report.export');
 
     Route::get('/test-email', function () {
         $user = auth()->user();

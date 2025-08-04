@@ -73,15 +73,14 @@
             <p class="text-gray-400 text-sm">#️⃣ Total Transactions</p>
             <p class="text-2xl font-bold">{{ $totalTransactions ?? 0 }}</p>
         </div>
-        <form action="{{ route('report.email') }}" method="POST">
-            @csrf
+        <form action="{{ route('report.export') }}" method="GET">
             <!-- preserve filters -->
             <input type="hidden" name="start_date" value="{{ request('start_date') }}">
             <input type="hidden" name="end_date" value="{{ request('end_date') }}">
             <input type="hidden" name="category" value="{{ request('category') }}">
 
-            <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                Email Report
+            <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                Export to CSV
             </button>
         </form>
     </div>
