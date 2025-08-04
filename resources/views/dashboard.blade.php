@@ -2,6 +2,18 @@
 
 @section('content')
 
+<!-- A simple, non-dismissible message to demonstrate how you could pass a simple message from a controller -->
+@if (session('status'))
+    <div class="mb-6 p-4 rounded-xl flex items-center justify-between shadow-sm bg-green-800 border border-green-700">
+        <div class="flex items-center space-x-3">
+            <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-sm font-medium text-white">{{ session('status') }}</span>
+        </div>
+    </div>
+@endif
+
 <header class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center">
     <div>
         <h1 class="text-3xl font-bold text-white">Dashboard</h1>
@@ -29,14 +41,21 @@
         </div>
     </div>
 
-    <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300">
+    <!-- Total Budget Card with Edit Button -->
+    <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300 relative">
         <div class="bg-green-500 p-3 rounded-full">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
         </div>
         <div>
             <p class="text-gray-400 text-sm">🧮 Total Budget</p>
             <p class="text-2xl font-bold">RM {{ number_format($budget->monthly_budget ?? 0, 2) }}</p>
         </div>
+        <!-- Edit Budget Icon -->
+        @if(isset($budget) && $budget)
+        <a href="{{ route('budget.edit', $budget->id) }}" class="absolute top-3 right-3 text-gray-500 hover:text-green-400 transition-colors duration-200">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+        </a>
+        @endif
     </div>
 
     <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center space-x-4 transform hover:scale-105 transition-transform duration-300">
@@ -110,6 +129,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // --- PIE CHART: SPENDING BY CATEGORY ---
