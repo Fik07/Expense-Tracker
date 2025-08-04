@@ -46,25 +46,48 @@
                     <!-- Right Side: Icons -->
                     <div class="hidden md:block">
                         <div class="ml-4 flex items-center md:ml-6 space-x-4">
-                            <!-- Notification Bell Button -->
-                            {{-- <div class="relative">
-                                <button @click="notificationsOpen = !notificationsOpen; settingsOpen = false" class="relative p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <!-- Notification Bell Button as Pop-up Toggle -->
+                            <div class="relative">
+                                <button type="button" @click="notificationsOpen = !notificationsOpen; settingsOpen = false" class="relative p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                                     <span class="sr-only">View notifications</span>
                                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                                     </svg>
-                                    @if(auth()->user() && auth()->user()->unreadNotifications->count())
+                                    @if(Auth::user() && Auth::user()->unreadNotifications->count())
                                         <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-gray-800"></span>
                                     @endif
-                                </button> --}}
+                                </button>
                                 <!-- Notification Panel -->
-                                {{-- <div x-show="notificationsOpen" x-cloak x-transition @click.away="notificationsOpen = false" class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none"> --}}
-                                    {{-- Notification content goes here --}}
+                                <div x-show="notificationsOpen" x-cloak x-transition
+                                     @click.away="notificationsOpen = false"
+                                     class="origin-top-right absolute right-0 mt-2 w-72 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="notification-menu-button">
+                                        <div class="px-4 py-3 border-b border-gray-700">
+                                            <p class="text-sm font-medium text-white">Recent Notifications</p>
+                                        </div>
+                                        {{-- Example mock notifications --}}
+                                        @if(Auth::user() && Auth::user()->unreadNotifications->count())
+                                            @foreach(Auth::user()->unreadNotifications->take(3) as $notification)
+                                                <a href="{{ route('notification') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white" role="menuitem">
+                                                    {{ $notification->data['message'] }}
+                                                </a>
+                                            @endforeach
+                                        @else
+                                            <div class="px-4 py-2 text-sm text-gray-500">No new notifications.</div>
+                                        @endif
+                                        <div class="border-t border-gray-700">
+                                            <a href="{{ route('notification') }}" class="block px-4 py-2 text-sm text-blue-400 hover:bg-gray-700 hover:text-blue-300" role="menuitem">
+                                                View All Notifications
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Settings Dropdown -->
                             <div class="relative">
+                                @auth
                                 <button @click="settingsOpen = !settingsOpen; notificationsOpen = false" class="p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                                     <span class="sr-only">Settings</span>
                                     <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -74,8 +97,8 @@
                                 </button>
                                 <!-- Settings Panel -->
                                 <div x-show="settingsOpen" x-cloak x-transition
-                                     @click.away="settingsOpen = false"
-                                     class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                        @click.away="settingsOpen = false"
+                                        class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
                                     <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
                                         <div class="px-4 py-3 border-b border-gray-700">
                                             <p class="text-sm">Signed in as</p>
@@ -91,6 +114,7 @@
                                         </form>
                                     </div>
                                 </div>
+                                @endauth
                             </div>
                         </div>
                     </div>
@@ -101,9 +125,37 @@
         <!-- Page Content -->
         <main>
             <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+                <!-- Session messages -->
                 @if (session('success'))
-                    <div class="bg-green-500 text-white p-4 rounded-md mb-4">
-                        {{ session('success') }}
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                         class="fixed top-20 right-8 z-50 flex items-center justify-between p-4 mb-4 rounded-lg bg-green-500 text-white shadow-lg space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            <span>{{ session('success') }}</span>
+                        </div>
+                        <button @click="show = false" class="text-white hover:text-gray-200 focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.duration.500ms
+                         class="fixed top-20 right-8 z-50 flex items-center justify-between p-4 mb-4 rounded-lg bg-red-500 text-white shadow-lg space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                            <span>{{ session('error') }}</span>
+                        </div>
+                        <button @click="show = false" class="text-white hover:text-gray-200 focus:outline-none">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
                     </div>
                 @endif
                 @yield('content')

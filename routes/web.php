@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CustomNotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -34,8 +35,10 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name(name: 'logout');
 
+    Route::get('/notification', [CustomNotificationController::class, 'index'])->name('notification');
+    Route::post('/notification/{id}/read', [CustomNotificationController::class, 'markAsRead'])->name('notification.read');
 
     // Budget
     Route::get('/budget/create', [BudgetController::class, 'create'])->name('budget.create');

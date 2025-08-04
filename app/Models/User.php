@@ -24,6 +24,7 @@ class User extends Authenticatable
         'photo',
     ];
 
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -46,4 +47,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    use Notifiable;
+    public function notifications()
+    {
+        return $this->hasMany(CustomNotification::class);
+    }
+
+
 }
