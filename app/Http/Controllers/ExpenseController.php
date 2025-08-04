@@ -41,6 +41,37 @@ class ExpenseController extends Controller
         return redirect()->route('dashboard')->with('success', 'Expense added successfully!');
     }
 
+    public function edit($id)
+    {
+        $expense = Expense::findOrFail($id);
+
+        return view('expense.edit', compact('expense'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'category' => 'required|string|max:50',
+            'date' => 'required|date',
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        $expense = Expense::findOrFail($id);
+        $expense->update($validated);
+
+        return redirect()->route('report')->with('status', 'Expense updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $expense = Expense::findOrFail($id);
+        $expense->delete();
+
+        return redirect()->route('report')->with('status', 'Expense deleted successfully.');
+    }
+
+
     // Show a specific expense, only if it belongs to the logged-in user
     public function show($id)
     {

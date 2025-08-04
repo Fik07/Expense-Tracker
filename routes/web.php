@@ -45,7 +45,10 @@ Route::middleware(['auth'])->group(function () {
 
     // Expense
     Route::get('/expense/create', [ExpenseController::class, 'create'])->name('expense.create');
+    Route::put('/expense/{expense}', [ExpenseController::class, 'update'])->name('expense.update');
+    Route::get('/expense/{expense}/edit', [ExpenseController::class, 'edit'])->name('expense.edit');
     Route::post('/expense', [ExpenseController::class, 'store'])->name('expense.store');
+    Route::delete('/expense/{expense}', [ExpenseController::class, 'destroy'])->name(name: 'expense.destroy');
 
     Route::post('/logout', function () {
         Auth::logout();

@@ -27,17 +27,6 @@
             @enderror
         </div>
 
-        <!-- Weekly Budget (optional) -->
-        <div class="mb-4">
-            <label for="weekly_budget" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Weekly Budget (optional)</label>
-            <input type="number" name="weekly_budget" id="weekly_budget" value="{{ old('weekly_budget', $budget->weekly_budget) }}"
-                class="w-full mt-1 p-2 rounded-md border @error('weekly_budget') border-red-500 @else border-gray-300 dark:border-gray-700 @enderror bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                min="0" step="0.01">
-            @error('weekly_budget')
-                <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-
         <div class="flex justify-end space-x-4">
             <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded hover:bg-gray-400 dark:hover:bg-gray-500 transition">Cancel</a>
             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">Update Budget</button>
